@@ -26,9 +26,8 @@ def cfrac(n):
         u = a * v - u
 
 
-def brillhart_morrison(n, k=5):
+def brillhart_morrison(n, k=5, attempts=1):
     # Build the factor base
-
     factor_base = [-1]
     factor_base_size = len(factor_base)
 
@@ -41,42 +40,42 @@ def brillhart_morrison(n, k=5):
 
     factor_base = np.array(factor_base, dtype=np.int64)
     k = factor_base_size
-
-    # Find k+1 b-smooth sqares
-    p = 0
-    a_b_smooth = np.zeros(k + 1, dtype=np.int64)
     cfrac_gen = cfrac(n)
-    v = np.zeros((k + 1, factor_base_size), dtype=np.int64)
-    while p != k + 1:
-        a = next(cfrac_gen) % n
-        b = (a ** 2) % n
-        if (c := get_fb_representation(b, n, factor_base)) is not None:
-            v[p] = c
-            a_b_smooth[p] = a
-            p += 1
 
-    solutions = fastgauss_elimination_solve(v)
+    for _ in range(attempts):
+        # Find k+1 b-smooth sqares
+        p = 0
+        a_b_smooth = np.zeros(k + 1, dtype=np.int64)
+        v = np.zeros((k + 1, factor_base_size), dtype=np.int64)
+        while p != k + 1:
+            a = next(cfrac_gen) % n
+            b = (a ** 2) % n
+            if (c := get_fb_representation(b, n, factor_base)) is not None:
+                v[p] = c
+                a_b_smooth[p] = a
+                p += 1
 
-    for solution in solutions:
-        # sadly, no prod modulo n in numpy...
-        x = 1
-        for xi in np.power(a_b_smooth, solution):
-            x = x * int(xi) % n
-        y = 1
-        for yi in np.power(factor_base, np.sum(np.multiply(solution, v.transpose()).transpose(), 0) // 2):
-            y = y * int(yi) % n
+        solutions = fastgauss_elimination_solve(v)
 
-        ## this will produce incorrect result for large n because of overflows
-        # x = np.prod(np.power(a_b_smooth, solution)) % n
-        # y = np.prod(np.power(factor_base, np.sum(np.multiply(solution, v.transpose()).transpose(),0) // 2)) % n
-        # assert (pow(int(x), 2, n) - pow(int(y), 2, n)) % n == 0
+        for solution in solutions:
+            # sadly, no prod modulo n in numpy...
+            x = 1
+            for xi in np.power(a_b_smooth, solution):
+                x = x * int(xi) % n
+            y = 1
+            for yi in np.power(factor_base, np.sum(np.multiply(solution, v.transpose()).transpose(), 0) // 2):
+                y = y * int(yi) % n
 
-        if x == y or x == (-y % n):
-            continue
-        return int(np.gcd(x + y, n)), int(np.gcd(x - y, n))
-    else:
-        # Could not factorize
-        return None
+            ## this will produce incorrect result for large n because of overflows
+            # x = np.prod(np.power(a_b_smooth, solution)) % n
+            # y = np.prod(np.power(factor_base, np.sum(np.multiply(solution, v.transpose()).transpose(),0) // 2)) % n
+            # assert (pow(int(x), 2, n) - pow(int(y), 2, n)) % n == 0
+
+            if x == y or x == (-y % n):
+                continue
+            return int(np.gcd(x + y, n)), int(np.gcd(x - y, n))
+
+    return None
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ def main(args):
             is_prime = True
             canonical[n] = 1
 
-        while (d := trial_division_pascal(n)) is not None and not is_prime:
+        while not is_prime and (d := trial_division_pascal(n)) is not None:
             print(f"Found {d} by trial division")
             canonical_add(canonical, d)
             n //= d
@@ -52,7 +52,7 @@ def main(args):
             pollard = partial(pollard_factorization, f=lambda x: x ** 2 + 1, x0=1, method=get_pollard_algo(args.pollard_mod))
 
         # Only find one divisor
-        if (d := pollard(n)) is not None and not is_prime:
+        if not is_prime and (d := pollard(n)) is not None:
             print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
             canonical_add(canonical, d)
             n //= d
@@ -60,7 +60,7 @@ def main(args):
             if is_prime:
                 print(f"{n} is prime")
 
-        while (dd := brillhart_morrison(n, k=args.k)) is not None and not is_prime:
+        while not is_prime and (dd := brillhart_morrison(n, k=args.k, attempts=args.attempts)) is not None:
             print(f"Found {dd[0]} by Brillhart-Morrison's method")
             canonical_add(canonical, dd[0])
             n = int(n) // dd[0]
@@ -91,6 +91,10 @@ if __name__ == "__main__":
 
     bm_options = argparser.add_argument_group(title='Brillhart-Morrison', description="Brillhart-Morrison method options")
     bm_options.add_argument("--k", default=5, type=int, help="number of consecutive primes in factorization base")
+    bm_options.add_argument(
+        "--attempts", default=5, type=int,
+        help="maximum attempts with different sets of B-smooth numbers for chosen factorization base"
+        )
 
     primetest_option = argparser.add_argument_group(title="Primality tets", description="Primality tests options")
     primetest_option.add_argument("--m", help="test rounds", default=10, type=int)
