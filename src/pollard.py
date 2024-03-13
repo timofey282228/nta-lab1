@@ -47,6 +47,7 @@ def pollard_factorization(
     # we must've checked all pairs possible with the chosen method
     return None
 
+
 def pollard_floyd(n):
     x = y = 2
     while True:
@@ -54,10 +55,5 @@ def pollard_floyd(n):
         y = pow(pow(y, 2, n) + 1, 2, n) + 1
         if (x - y) % n == 0:
             return None
-        if (d:= gcd(x - y, n)) != 1:
+        if (d := gcd(x - y, n)) != 1:
             return d
-
-if __name__ == '__main__':
-    # N = int(input("N: "))
-
-    print(pollard_floyd(2500744714570633849//43//303983//7699))

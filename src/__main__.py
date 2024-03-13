@@ -83,7 +83,7 @@ def main(args):
                         )
                 ) is not None and not is_prime
         ):
-            print(f"Found {d} by Brillhart-Morrisoon method")
+            print(f"Found {d} by Brillhart-Morrison method")
             canonical_add(canonical, d)
             n //= d
             is_prime = miller_rabin_test(n)
@@ -101,7 +101,7 @@ def main(args):
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
-        description="This program performs factorization of integers using trial division, pollard's rho method, and brillhart-morrison's method."
+        description="This program performs factorization of integers using trial division, Pollard's rho method, and Brillhart-Morrison's method."
     )
     argparser.add_argument("n", type=int, action='extend', nargs='+', help="integers to factorize")
 
