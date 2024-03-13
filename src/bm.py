@@ -61,10 +61,10 @@ def brillhart_morrison(n, k=5):
         # sadly, no prod modulo n in numpy...
         x = 1
         for xi in np.power(a_b_smooth, solution):
-            x = x * xi % n
+            x = x * int(xi) % n
         y = 1
         for yi in np.power(factor_base, np.sum(np.multiply(solution, v.transpose()).transpose(), 0) // 2):
-            y = y * yi % n
+            y = y * int(yi) % n
 
         ## this will produce incorrect result for large n because of overflows
         # x = np.prod(np.power(a_b_smooth, solution)) % n
@@ -73,7 +73,7 @@ def brillhart_morrison(n, k=5):
 
         if x == y or x == (-y % n):
             continue
-        return np.gcd(x + y, n), np.gcd(x - y, n)
+        return int(np.gcd(x + y, n)), int(np.gcd(x - y, n))
     else:
         # Could not factorize
         return None

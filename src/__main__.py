@@ -45,47 +45,25 @@ def main(args):
             if is_prime:
                 print(f"{n} is prime")
 
+        # choosing Polard's rho method modification
         if args.pollard_mod == "floyd_cycle":
-            # TODO redo with partial or sth
-            while (
-                    (
-                            d := pollard_floyd(n)
-                    ) is not None and not is_prime
-            ):
-                print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
-                canonical_add(canonical, d)
-                n //= d
-                is_prime = miller_rabin_test(n, k=args.m)
-                if is_prime:
-                    print(f"{n} is prime")
+            pollard = pollard_floyd
         else:
-            while (
-                    (
-                            d := pollard_factorization(
-                                n,
-                                lambda x: x ** 2 + 1, 1,
-                                method=get_pollard_algo(args.pollard_mod)
-                            )
-                    ) is not None and not is_prime
-            ):
-                print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
-                canonical_add(canonical, d)
-                n //= d
-                is_prime = miller_rabin_test(n, k=args.m)
-                if is_prime:
-                    print(f"{n} is prime")
+            pollard = partial(pollard_factorization, f=lambda x: x ** 2 + 1, x0=1, method=get_pollard_algo(args.pollard_mod))
 
-        while (
-                (
-                        d := brillhart_morrison(
-                            n,
-                            k=args.k
-                        )
-                ) is not None and not is_prime
-        ):
-            print(f"Found {d} by Brillhart-Morrison method")
+        # Only find one divisor
+        if (d := pollard(n)) is not None and not is_prime:
+            print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
             canonical_add(canonical, d)
             n //= d
+            is_prime = miller_rabin_test(n, k=args.m)
+            if is_prime:
+                print(f"{n} is prime")
+
+        while (dd := brillhart_morrison(n, k=args.k)) is not None and not is_prime:
+            print(f"Found {dd[0]} by Brillhart-Morrison's method")
+            canonical_add(canonical, dd[0])
+            n = int(n) // dd[0]
             is_prime = miller_rabin_test(n)
             if is_prime:
                 print(f"{n} is prime")
