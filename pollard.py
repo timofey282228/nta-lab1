@@ -50,9 +50,9 @@ def pollard_factorization(
 def pollard_floyd(n):
     x = y = 2
     while True:
-        x = pow(x, 2, n) + 1
-        y = pow(pow(y, 2, n), 2, n) + 1
-        if x == y:
+        x = (pow(x, 2, n) + 1)
+        y = pow(pow(y, 2, n) + 1, 2, n) + 1
+        if (x - y) % n == 0:
             return None
         if (d:= gcd(x - y, n)) != 1:
             return d
@@ -60,4 +60,4 @@ def pollard_floyd(n):
 if __name__ == '__main__':
     # N = int(input("N: "))
 
-    print(pollard_floyd(633209))
+    print(pollard_floyd(2500744714570633849//43//303983//7699))
