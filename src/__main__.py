@@ -26,8 +26,15 @@ def canonical_add(canonical: dict[int, int], p: int):
         canonical[p] = 1
 
 
+def canonical_to_str(canonical, latex=False):
+    return (("$" if latex else "") +
+            " {} ".format("\\cdot" if latex else "*").join((str(pr) + "^" + str(po) for pr, po in canonical.items())) +
+            ("$" if latex else ""))
+
+
 def main(args):
     for n in args.n:
+        current_n = n
         print(f"Factorizing n = {n}")
         canonical: dict[int, int] = {}  # primes to corresponing powers in the canonnical representation
         is_prime = False
@@ -35,7 +42,6 @@ def main(args):
         if miller_rabin_test(n):
             print("Was prime")
             is_prime = True
-            canonical[n] = 1
 
         while not is_prime and (d := trial_division_pascal(n)) is not None:
             print(f"Found {d} by trial division")
@@ -68,12 +74,12 @@ def main(args):
             if is_prime:
                 print(f"{n} is prime")
 
-        canonical_add(canonical, n)
-
-        if n != 1 and not is_prime:
-            print("Could not fully factorize")
+        if is_prime:
+            if n != 1:
+                canonical_add(canonical, n)
+            print(f"Canonical representation of {current_n}: {canonical_to_str(canonical, latex=args.latex)}")
         else:
-            print(f"Canonical representation of {n}: {canonical}")
+            print("Could not fully factorize")
         print()
 
 
@@ -90,14 +96,16 @@ if __name__ == "__main__":
     )
 
     bm_options = argparser.add_argument_group(title='Brillhart-Morrison', description="Brillhart-Morrison method options")
-    bm_options.add_argument("--k", default=5, type=int, help="number of consecutive primes in factorization base")
+    bm_options.add_argument("--k", default=7, type=int, help="number of consecutive primes in factorization base")
     bm_options.add_argument(
         "--attempts", default=5, type=int,
         help="maximum attempts with different sets of B-smooth numbers for chosen factorization base"
-        )
+    )
 
     primetest_option = argparser.add_argument_group(title="Primality tets", description="Primality tests options")
     primetest_option.add_argument("--m", help="test rounds", default=10, type=int)
 
+    display_options = argparser.add_argument_group(title="Display", description="Display options")
+    display_options.add_argument("--latex", action='store_true', help="Output will be printed in latex where appropriate")
     args = argparser.parse_args()
     main(args)

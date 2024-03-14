@@ -3,6 +3,12 @@ from math import gcd
 
 
 def miller_rabin_test(p: int, k: int = 15) -> bool:
+    # special case because of randint range
+    if abs(p) < 4:
+        return True
+    elif p == 4:
+        return False
+
     # 0
     # p - 1 = d * 2**s
     s = 0;
