@@ -3,6 +3,7 @@ import time
 
 from miller_rabin import miller_rabin_test
 from trial_division import trial_division_pascal
+from solovay_strassen import solovay_strassen
 from pollard import pollard_factorization, pollard_floyd, floyd, classic, h
 from bm import brillhart_morrison
 from functools import partial
@@ -106,6 +107,15 @@ def factorize(args):
 
         print(stats.stop())
         print()
+
+        if not is_prime and (d := solovay_strassen(n)) is not None:
+            print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
+            canonical_add(canonical, d)
+            n //= d
+            is_prime = miller_rabin_test(n, k=args.m)
+            if is_prime:
+                print(f"{n} is prime")
+                print(stats.checkpoint())
 
 
 def benchmark(args):
