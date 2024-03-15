@@ -1,3 +1,11 @@
+### Збірка образу
+
+```bash
+git clone https://github.com/timofey282228/nta-lab1.git
+cd nta-lab1
+docker build -t ntalab1 .
+```
+
 ### Тестування
 
 Для всіх прикладів нижче передбачається, що ви перебуваєте в кореневій директорії проєкту і що Docker-образ був зібраний під ім'ям `my-python-app`.
@@ -5,42 +13,40 @@
 **1. Факторизація числа (n):**
 
 ```bash
-docker run -it --rm my-python-app python ./src/__main__.py 123456
+docker run --rm ntalab1 123456
 ```
 
 **2. Використання методу Полларда з модифікацією:**
 
 ```bash
-docker run -it --rm my-python-app python ./src/__main__.py 123456 --pollard_mod floyd
+docker run --rm ntalab1 123456 --pollard_mod floyd
 ```
 
 **3. Виведення у форматі LaTeX:**
 
 ```bash
-docker run -it --rm my-python-app python ./src/__main__.py 123456 --latex
+docker run --rm ntalab1 123456 --latex
 ```
 
 **4. Запуск із параметрами для методу Бріллхарта-Моррісона:**
 
 ```bash
-docker run -it --rm my-python-app python ./src/__main__.py 123456 --k 7 --attempts 5
+docker run --rm ntalab1 123456 -k 7 --attempts 5
 ```
 
 **5. вказівка кількості раундів тесту простоти:**
 
 ```bash
-docker run -it --rm my-python-app python ./src/__main__.py 123456 --m 10
+docker run --rm ntalab1 123456 -m 10
 ```
 
-**6. Запуск у режимі бенчмаркінгу:**
+**6. Запуск у режимі порівняння швидкості факторизації:**
 
 ```bash
-docker run -it --rm my-python-app python ./src/__main__.py --bench 123456 654321
+docker run --rm ntalab1 --algospeed 123456 654321
 ```
 
 ### Загальні поради щодо використання:
 
-- Завжди переконайтеся, що вказуєте `python ./src/__main__.py` перед вашими аргументами
-- Використовуйте прапор `-it` для інтерактивного режиму, що дозволяє вам бачити виведення вашої програми в терміналі.
 - Прапор `--rm` видаляє контейнер після його зупинки, що допомагає зберегти вашу систему чистою від невикористовуваних контейнерів.
 
