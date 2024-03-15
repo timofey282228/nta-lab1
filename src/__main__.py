@@ -64,6 +64,10 @@ def factorize(args):
     prime_test = get_primetest(args.prime_test)
 
     for n in args.n:
+        if n < 0:
+            print(f"Please provide n > 0 (n = {n} < 0)")
+            continue
+
         stats = TimeStats()
         current_n = n
         print(f"Factorizing n = {n}")
@@ -148,6 +152,10 @@ def algospeed(args):
     algos["Brillhart-Morrison's method"] = bm
 
     for n in args.n:
+        if n < 0:
+            print(f"Please provide n > 0 (n = {n} < 0)")
+            continue
+
         if args.latex:
             print(r"\begin{{table}}[h]\caption{{{}}}\begin{{tabular}}{{l|cr}}".format(n))
         else:
