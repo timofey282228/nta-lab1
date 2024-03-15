@@ -22,6 +22,14 @@ def get_pollard_algo(s):
             return None
 
 
+def get_primetest(s):
+    match s:
+        case "miller-rabin":
+            return miller_rabin_test
+        case "solovay-strassen":
+            return solovay_strassen
+
+
 def canonical_add(canonical: dict[int, int], p: int):
     if canonical.get(p) is not None:
         canonical[p] += 1
@@ -46,13 +54,15 @@ def select_pollard(args):
 
 
 def main(args):
-    if args.bench:
-        benchmark(args)
+    if args.algospeed:
+        algospeed(args)
     else:
         factorize(args)
 
 
 def factorize(args):
+    prime_test = get_primetest(args.prime_test)
+
     for n in args.n:
         stats = TimeStats()
         current_n = n
@@ -70,7 +80,7 @@ def factorize(args):
             print(stats.checkpoint())
             canonical_add(canonical, d)
             n //= d
-            is_prime = miller_rabin_test(n)
+            is_prime = prime_test(n)
             if is_prime:
                 print(f"{n} is prime")
                 print(stats.checkpoint())
@@ -83,7 +93,7 @@ def factorize(args):
             print(stats.checkpoint())
             canonical_add(canonical, d)
             n //= d
-            is_prime = miller_rabin_test(n, k=args.m)
+            is_prime = prime_test(n, k=args.m)
             if is_prime:
                 print(f"{n} is prime")
                 print(stats.checkpoint())
@@ -93,7 +103,7 @@ def factorize(args):
             print(stats.checkpoint())
             canonical_add(canonical, dd[0])
             n = int(n) // dd[0]
-            is_prime = miller_rabin_test(n)
+            is_prime = prime_test(n, k=args.m)
             if is_prime:
                 print(f"{n} is prime")
                 print(stats.checkpoint())
@@ -112,21 +122,30 @@ def factorize(args):
             print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
             canonical_add(canonical, d)
             n //= d
-            is_prime = miller_rabin_test(n, k=args.m)
+            is_prime = prime_test(n, k=args.m)
             if is_prime:
                 print(f"{n} is prime")
                 print(stats.checkpoint())
 
 
-def benchmark(args):
+def algospeed(args):
     algos = {
         # "Pascal trial division": trial_division_pascal,
         "Pollard's rho method with Floyd's cycle finding": pollard_floyd,
         "Pollard's rho method (classic)": partial(pollard_factorization, f=lambda x: x ** 2 + 1, x0=1, method=classic),
         "Pollard's rho method (floyd)": partial(pollard_factorization, f=lambda x: x ** 2 + 1, x0=1, method=floyd),
         "Pollard's rho method (h)": partial(pollard_factorization, f=lambda x: x ** 2 + 1, x0=1, method=h),
-        "Brillhart-Morrison's method": lambda n: brillhart_morrison(n, k=args.k, attempts=args.attempts)[0]
+        "Brillhart-Morrison's method": None
     }
+
+    def bm(n):
+        d = brillhart_morrison(n, k=args.k, attempts=args.attempts)
+        if d is not None:
+            return d[0]
+        else:
+            return None
+
+    algos["Brillhart-Morrison's method"] = bm
 
     for n in args.n:
         if args.latex:
@@ -137,7 +156,7 @@ def benchmark(args):
         header = ("Algorithm name", "Found divisor", "Execution time (µs)")
         if args.latex:
             print(
-                " & ".join(header) +  " \\\\"
+                " & ".join(header) + " \\\\"
             )
         else:
             print(
@@ -175,21 +194,24 @@ if __name__ == "__main__":
     )
 
     bm_options = argparser.add_argument_group(title='Brillhart-Morrison', description="Brillhart-Morrison method options")
-    bm_options.add_argument("--k", default=7, type=int, help="number of consecutive primes in factorization base")
+    bm_options.add_argument("-k", default=7, type=int, help="number of consecutive primes in factorization base")
     bm_options.add_argument(
         "--attempts", default=5, type=int,
         help="maximum attempts with different sets of B-smooth numbers for chosen factorization base"
     )
 
-    primetest_option = argparser.add_argument_group(title="Primality tets", description="Primality tests options")
-    primetest_option.add_argument("--m", help="test rounds", default=10, type=int)
+    primetest_option = argparser.add_argument_group(title="Primality test", description="Primality tests options")
+    primetest_option.add_argument(
+        "--prime_test", choices=['miller-rabin', 'solovay-strassen'], help="test algorithm", default="miller-rabin"
+    )
+    primetest_option.add_argument("-m", help="test rounds", default=10, type=int)
 
     display_options = argparser.add_argument_group(title="Display", description="Display options")
     display_options.add_argument("--latex", action='store_true', help="Output will be printed in latex where appropriate")
 
-    bench_options = argparser.add_argument_group(title="Benchmarking")
-    bench_options.add_argument(
-        "--bench",
+    algospeed_options = argparser.add_argument_group(title="Algorithm speed comparison")
+    algospeed_options.add_argument(
+        "--algospeed",
         action="store_true",
         help="Run each available factorization algorithm once for each n, find one divisor and print stats"
     )
