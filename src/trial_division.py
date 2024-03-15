@@ -17,9 +17,8 @@ def get_fb_representation(b, n, factor_base):
     pows = np.zeros(k, dtype=np.int64)
     i = 0
     if factor_base[i] == -1:
-        if abs(t := -b % n) < b:
+        if (t := -b % n) != 0 and t < b:
             pows[i] = 1
-            b = t
 
         i += 1
 
@@ -29,6 +28,7 @@ def get_fb_representation(b, n, factor_base):
             pows[i] += 1
             b //= e
         i += 1
+
 
     if b != 1:
         return None
