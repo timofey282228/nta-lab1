@@ -1,3 +1,10 @@
+### Використання образу з Dockerhub
+
+```bash
+docker pull timofey282228/nta-lab1:nta-lab1
+docker tag timofey282228/nta-lab1:nta-lab1 nta-lab1  #  для зручності у подальших прикладах
+```
+
 ### Збірка образу
 
 ```bash
