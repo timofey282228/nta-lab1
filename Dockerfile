@@ -1,6 +1,5 @@
-ENTRYPOINT ["python", "./src/__main__.py"]
 # Use an official Python runtime as a parent image
-FROM python:3.12
+FROM python:3.12.2
 
 # Set the working directory in the container
 WORKDIR /app
