@@ -6,7 +6,7 @@ def L(n):
 
 
 def legendre(a, p):
-    return pow(a, (p - 1) // 2, p) % 5
+    return pow(a, (p - 1) // 2, p)
 
 
 import time
