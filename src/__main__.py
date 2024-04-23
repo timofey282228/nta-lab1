@@ -84,7 +84,7 @@ def factorize(args):
             print(stats.checkpoint())
             canonical_add(canonical, d)
             n //= d
-            is_prime = prime_test(n)
+            is_prime = prime_test(n, k=args.m)
             if is_prime:
                 print(f"{n} is prime")
                 print(stats.checkpoint())
