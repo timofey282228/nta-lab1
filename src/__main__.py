@@ -122,15 +122,6 @@ def factorize(args):
         print(stats.stop())
         print()
 
-        if not is_prime and (d := solovay_strassen(n)) is not None:
-            print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
-            canonical_add(canonical, d)
-            n //= d
-            is_prime = prime_test(n, k=args.m)
-            if is_prime:
-                print(f"{n} is prime")
-                print(stats.checkpoint())
-
 
 def algospeed(args):
     algos = {
