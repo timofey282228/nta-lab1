@@ -74,7 +74,7 @@ def factorize(args):
         canonical: dict[int, int] = {}  # primes to corresponing powers in the canonical representation
         is_prime = False
 
-        if miller_rabin_test(n):
+        if prime_test(n, k=args.m):
             print("Was prime")
             print(stats.checkpoint())
             is_prime = True
