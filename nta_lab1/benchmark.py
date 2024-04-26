@@ -6,7 +6,7 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import rcParams
 
-from solovay_strassen import solovay_strassen
+from .solovay_strassen import solovay_strassen
 
 
 def benchmark(args):

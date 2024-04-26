@@ -1,15 +1,15 @@
 ### Використання образу з Dockerhub
 
 ```bash
-docker pull timofey282228/nta-lab1:nta-lab1
-docker tag timofey282228/nta-lab1:nta-lab1 nta-lab1  #  для зручності у подальших прикладах
+docker pull timofey282228/nta-lab1:latest
+docker tag timofey282228/nta-lab1:nta_lab1 nta_lab1  #  для зручності у подальших прикладах
 ```
 
 ### Збірка образу
 
 ```bash
 git clone https://github.com/timofey282228/nta-lab1.git
-cd nta-lab1
+cd nta_lab1
 docker build -t ntalab1 .
 ```
 

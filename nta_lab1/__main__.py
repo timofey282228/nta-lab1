@@ -1,12 +1,13 @@
 import argparse
 import time
-from functools import partial
 
-from bm import brillhart_morrison
-from miller_rabin import miller_rabin_test
-from pollard import pollard_factorization, pollard_floyd, floyd, classic, h
-from solovay_strassen import solovay_strassen
-from trial_division import trial_division_pascal
+from .miller_rabin import miller_rabin_test
+from .trial_division import trial_division_pascal
+from .solovay_strassen import solovay_strassen
+from .pollard import pollard_factorization, pollard_floyd, floyd, classic, h
+from .bm import brillhart_morrison
+from functools import partial
+from .timestats import TimeStats
 
 
 def get_pollard_algo(s):
@@ -59,40 +60,76 @@ def main(args):
         factorize(args)
 
 
-def factorize(n, k=7, attempts=5, m=10):
-    prime_test = solovay_strassen
+def factorize(args):
+    prime_test = get_primetest(args.prime_test)
 
-    current_n = n
-    canonical: dict[int, int] = {}  # primes to corresponing powers in the canonical representation
-    is_prime = False
+    for n in args.n:
+        if n < 0:
+            print(f"Please provide n > 0 (n = {n} < 0)")
+            continue
 
-    if miller_rabin_test(n):
-        is_prime = True
+        stats = TimeStats()
+        current_n = n
+        print(f"Factorizing n = {n}")
+        canonical: dict[int, int] = {}  # primes to corresponing powers in the canonical representation
+        is_prime = False
 
-    while not is_prime and (d := trial_division_pascal(n)) is not None:
-        canonical_add(canonical, d)
-        n //= d
-        is_prime = prime_test(n)
+        if miller_rabin_test(n):
+            print("Was prime")
+            print(stats.checkpoint())
+            is_prime = True
 
-    pollard = pollard_floyd
+        while not is_prime and (d := trial_division_pascal(n)) is not None:
+            print(f"Found {d} by trial division")
+            print(stats.checkpoint())
+            canonical_add(canonical, d)
+            n //= d
+            is_prime = prime_test(n)
+            if is_prime:
+                print(f"{n} is prime")
+                print(stats.checkpoint())
 
-    # Only find one divisor
-    if not is_prime and (d := pollard(n)) is not None:
-        canonical_add(canonical, d)
-        n //= d
-        is_prime = prime_test(n, k=args.m)
+        pollard = select_pollard(args)
 
-    while not is_prime and (dd := brillhart_morrison(n, k=k, attempts=attempts)) is not None:
-        canonical_add(canonical, dd[0])
-        n = int(n) // dd[0]
-        is_prime = prime_test(n, k=m)
+        # Only find one divisor
+        if not is_prime and (d := pollard(n)) is not None:
+            print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
+            print(stats.checkpoint())
+            canonical_add(canonical, d)
+            n //= d
+            is_prime = prime_test(n, k=args.m)
+            if is_prime:
+                print(f"{n} is prime")
+                print(stats.checkpoint())
 
-    if is_prime:
-        if n != 1:
-            canonical_add(canonical, n)
-        return canonical
-    else:
-        return None
+        while not is_prime and (dd := brillhart_morrison(n, k=args.k, attempts=args.attempts)) is not None:
+            print(f"Found {dd[0]} by Brillhart-Morrison's method")
+            print(stats.checkpoint())
+            canonical_add(canonical, dd[0])
+            n = int(n) // dd[0]
+            is_prime = prime_test(n, k=args.m)
+            if is_prime:
+                print(f"{n} is prime")
+                print(stats.checkpoint())
+
+        if is_prime:
+            if n != 1:
+                canonical_add(canonical, n)
+            print(f"Canonical representation of {current_n}: {canonical_to_str(canonical, latex=args.latex)}")
+        else:
+            print("Could not fully factorize")
+
+        print(stats.stop())
+        print()
+
+        if not is_prime and (d := solovay_strassen(n)) is not None:
+            print(f"Found {d} by Pollard's rho method ({args.pollard_mod})")
+            canonical_add(canonical, d)
+            n //= d
+            is_prime = prime_test(n, k=args.m)
+            if is_prime:
+                print(f"{n} is prime")
+                print(stats.checkpoint())
 
 
 def algospeed(args):
